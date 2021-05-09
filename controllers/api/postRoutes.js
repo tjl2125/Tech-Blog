@@ -3,8 +3,9 @@ const { Post, User, Comment } = require('../../models');
 const withAuth = require('../../utils/auth');
 // const sequelize =  require ('../../config/connection'); 
 
-router.get('/', (req, res) => {
-    Post.findAll({
+router.get('/', async (req, res) => {
+  try {
+    const allPosts = await Post.findAll({
         attributes: [
             "id",
             "title",
@@ -23,11 +24,12 @@ router.get('/', (req, res) => {
             }, 
         ]
     })
-    .then(postData => res.json(postData))
-    .catch (err => {
+    const pData = allPosts.map((post) => post.get({ plain: true}));
+    res.status(200).json(pData);
+  } catch (err) {
         console.log(err);
         res.status(500).json(err); 
-    })
+    };
 }); 
 
 router.get('/:id', (req,res) => {
@@ -72,8 +74,8 @@ router.get('/:id', (req,res) => {
 router.post('/', withAuth, async (req, res) => {
   try {
     const newPost = await Post.create({
-      ...req.body,
-      post_content: req.body.post_text, 
+      title: req.body.title, 
+      post_text: req.body.post_text, 
       user_id: req.session.user_id,
     });
 
@@ -87,7 +89,8 @@ router.put('/:id', withAuth, (req, res) => {
     try {
     const postData = Post.update({
         title: req.body.title,
-        post_content: req.body.post_content
+        post_content: req.body.post_content,
+        user_id: req.session.user_id
       },
       {
         where: {
@@ -98,7 +101,7 @@ router.put('/:id', withAuth, (req, res) => {
           res.status(404).json({ message: 'No post found with this id' });
           return;
         }
-        res.json(dbPostData);
+        res.status(200).res.json(postData);
     } catch(err) {
         console.log(err);
         res.status(500).json(err);
