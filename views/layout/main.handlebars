@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fund My Project!</title>
+  <title>Tech Blog</title>
   <link rel="stylesheet" href="/css/jass.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -13,21 +13,22 @@
   <div class="flex-column justify-space-around">
     <header class="display-flex justify-space-between align-center p-2">
       <h1>
-        <span role="img" aria-label="money">💸</span>
-        <a href="/">Fund My Project!</a>
+        <a href="/">Tech Blog</a>
       </h1>
       <nav>
         <!-- Conditionally render login or logout links -->
         {{#if logged_in}}
-        <a href="/profile">profile</a> |
-        <button class="no-button" id="logout">logout</button>
+          <a href="/" class="navbar-item is-hoverable pt-1">homepage</a>
+          <a href="/dashboard" class="navbar-item is-hoverable pt-1">dashboard</a>
+          <a href="/dashboard/create/" class="navbar-item is-hoverable pt-1 mr-4">create post</a>
+          <button id="logout" class="button is-danger">logout</button>
         {{else}}
+        <a href="/" class="navbar-item is-hoverable pt-1">homepage</a>
         <a href="/login">login</a>
         {{/if}}
       </nav>
     </header>
     <main class="container container-fluid mt-5">
-      <!-- Render the sub layout -->
       {{{ body }}}
     </main>
     <footer>
