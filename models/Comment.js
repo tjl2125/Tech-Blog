@@ -11,6 +11,19 @@ Comment.init(
         allowNull: false,
         autoIncrement: true
       },
+      comment_text: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          //comment has to be at least 1 character long
+            len: [1]
+        }
+      },
+      // date_created: {
+      //   type: DataTypes.DATE,
+      //   allowNull: false,
+      //   defaultValue: DataTypes.NOW,
+      // },
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -27,18 +40,7 @@ Comment.init(
           key: 'id'
         }
       },
-      comment_text: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            len: [1]
-        }
-      },
-      date_created: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-      },
+      
   },
   {
     sequelize,

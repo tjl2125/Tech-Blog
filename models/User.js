@@ -19,6 +19,9 @@ User.init(
     username: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: true,
+      }
     },
     email: {
       type: DataTypes.STRING,
@@ -32,6 +35,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
+        //password is at least 8 characters long
         len: [8],
       },
     },

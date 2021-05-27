@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const { User, Post, Comment } = require('../../models');
 const withAuth = require ('../../utils/auth'); 
+const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store); 
 
 router.get('/', async (req, res) => {
   User.findAll( {
@@ -49,7 +51,11 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const userData = await User.create(req.body);
+    const userData = await User.create({ //req.body
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
+    });
 
     req.session.save(() => {
       req.session.user_id = userData.id;
@@ -64,26 +70,22 @@ router.post('/', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  try {
-    const userData = await User.findOne({ 
+
+  await User.findOne({ 
       where: { 
         email: req.body.email 
       } 
-    });
-
+    })
+    .then(userData => {
     if (!userData) {
-      res
-        .status(400)
-        .json({ message: 'Incorrect email or password, please try again' });
+      res.status(400).json({ message: 'Incorrect email or password, please try again' });
       return;
     }
 
-    const validPassword = await userData.checkPassword(req.body.password);
+    const validPassword = userData.checkPassword(req.body.password);
 
     if (!validPassword) {
-      res
-        .status(400)
-        .json({ message: 'Incorrect email or password, please try again' });
+      res.status(400).json({ message: 'Incorrect email or password, please try again' });
       return;
     }
 
@@ -94,10 +96,7 @@ router.post('/login', async (req, res) => {
       
       res.json({ user: userData, message: 'You are now logged in!' });
     });
-
-  } catch (err) {
-    res.status(400).json(err);
-  }
+  });
 });
 
 router.post('/logout', (req, res) => {
@@ -109,5 +108,48 @@ router.post('/logout', (req, res) => {
     res.status(404).end();
   }
 });
+
+router.put('/:id', withAuth, (req, res) => {
+
+  User.update(req.body, {
+
+      individualHooks: true,
+
+      where: {
+          id: req.params.id
+      }
+  })
+    .then(dbUserData => {
+      if (!dbUserData[0]) {
+        res.status(404).json({ message: 'No user found with this id' });
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+})
+
+router.delete('/:id', withAuth, (req, res) => {
+  User.destroy({
+    where: {
+      id: req.params.id
+    }
+  })
+    .then(dbUserData => {
+      if (!dbUserData) {
+        res.status(404).json({ message: 'No user found with this id' });
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
+
 
 module.exports = router;

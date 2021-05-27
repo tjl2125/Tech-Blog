@@ -24,6 +24,7 @@ const sess = {
 
 app.use(session(sess));
 
+//Template Enginge handlebars used
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 

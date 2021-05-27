@@ -17,6 +17,11 @@ Post.init(
     },
     post_text: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        //post has to be at least 1 character long
+        len: [1]
+      }
     },
     date_created: {
       type: DataTypes.DATE,

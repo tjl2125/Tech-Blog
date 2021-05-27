@@ -12,7 +12,12 @@ router.get('/', async (req, res) => {
         'date_created',
         'post_text',
       ],
+      order: [['date_created', 'DESC']],
       include: [
+        {
+          model: User,
+          attributes: ['username'],
+        },
         {
           model: Comment,
           attributes: ['id', 'comment_text', 'post_id', 'user_id', 'date_created'],
@@ -21,65 +26,55 @@ router.get('/', async (req, res) => {
             attributes: ['username']
           }
         },
-        {
-          model: User,
-          attributes: ['username'],
-        },
       ],
     });
-
-    // Serialize data so the template can read it
     const posts = postData.map((post) => post.get({ plain: true }));
 
-    // Pass serialized data and session flag into template
     res.render('homepage', { 
       posts, 
-      logged_in: req.session.logged_in 
+      logged_in: req.session.logged_in,
+      userName: req.session.username, 
     });
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-router.get('/post/:id', async (req, res) => {
-  try {
-    const postData = await Post.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          attributes: ['name'],
-        },
-      ],
-    });
+// router.get('/post/:id', async (req, res) => {
+//   try {
+//     const onePost = await Post.findByPk(req.params.id, {
+//       attributes: [
+//         'id',
+//         'post_text',
+//         'title',
+//         'date_created',
+//       ],
+//       include: [
+//         {
+//           model: User,
+//           attributes: ['name'],
+//         },
+//         {
+//           model: Comment,
+//           attributes: ['id', 'comment_text', 'post_id', 'user_id', 'date_created'],
+//           include: {
+//             model: User,
+//             attributes: ['username']
+//           }
+//         },
+//       ],
+//     });
 
-    const post = postData.get({ plain: true });
+//     const post = onePost.get({ plain: true });
 
-    res.render('post', {
-      ...post,
-      logged_in: req.session.logged_in
-    });
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-router.get('/login', (req, res) => {
-  if (req.session.logged_in) {
-    res.redirect('/');
-    return;
-  }
-
-  res.render('login');
-});
-
-router.get('/signup', (req, res) => {
-  if (req.session.loggedIn) {
-    res.redirect('/');
-    return;
-  }
-  res.render('signup'); 
-}
-);
+//     res.render('post', {
+//       post,
+//       logged_in: req.session.logged_in
+//     });
+//   } catch (err) {
+//     res.status(500).json(err);
+//   }
+// });
 
 router.get('/post/:id', (req, res) => {
   Post.findOne({
@@ -119,6 +114,24 @@ router.get('/post/:id', (req, res) => {
     console.log(err);
     res.status(500).json(err); 
   })
-})
+}); 
+
+
+router.get('/login', (req, res) => {
+  if (req.session.logged_in) {
+    res.redirect('/');
+    return;
+  }
+  res.render('login');
+});
+
+router.get('/signup', (req, res) => {
+  if (req.session.loggedIn) {
+    res.redirect('/');
+    return;
+  }
+  res.render('signup'); 
+}
+);
 
 module.exports = router;
